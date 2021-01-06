@@ -104,6 +104,7 @@ import sun.misc.SharedSecrets;
  * @since   1.2
  */
 
+//RandomAccess：只是一个标记接口，意味着实现类具有随机访问特性
 public class ArrayList<E> extends AbstractList<E>
         implements List<E>, RandomAccess, Cloneable, java.io.Serializable
 {
@@ -112,11 +113,13 @@ public class ArrayList<E> extends AbstractList<E>
     /**
      * Default initial capacity.
      */
+    //数组默认容量
     private static final int DEFAULT_CAPACITY = 10;
 
     /**
      * Shared empty array instance used for empty instances.
      */
+    //当初始化的时候，capacity为0的时候，赋值给elementData的空数组
     private static final Object[] EMPTY_ELEMENTDATA = {};
 
     /**
@@ -124,6 +127,7 @@ public class ArrayList<E> extends AbstractList<E>
      * distinguish this from EMPTY_ELEMENTDATA to know how much to inflate when
      * first element is added.
      */
+    //java.util.ArrayList.ArrayList()，数组初始化时候赋值给elementData的空数组
     private static final Object[] DEFAULTCAPACITY_EMPTY_ELEMENTDATA = {};
 
     /**
@@ -132,6 +136,7 @@ public class ArrayList<E> extends AbstractList<E>
      * empty ArrayList with elementData == DEFAULTCAPACITY_EMPTY_ELEMENTDATA
      * will be expanded to DEFAULT_CAPACITY when the first element is added.
      */
+    //存放元素数组
     transient Object[] elementData; // non-private to simplify nested class access
 
     /**
@@ -139,6 +144,7 @@ public class ArrayList<E> extends AbstractList<E>
      *
      * @serial
      */
+    //数组的元素个数
     private int size;
 
     /**
@@ -256,6 +262,17 @@ public class ArrayList<E> extends AbstractList<E>
     private void grow(int minCapacity) {
         // overflow-conscious code
         int oldCapacity = elementData.length;
+
+
+        //扩容为原来的1.5倍
+        /*
+        * 00001010  -> 10
+        *   ↓
+        *   ↓ 10 >> 1
+        *   ↓
+        * 00000101  ->  5
+        *
+        *  */
         int newCapacity = oldCapacity + (oldCapacity >> 1);
         if (newCapacity - minCapacity < 0)
             newCapacity = minCapacity;
@@ -460,6 +477,11 @@ public class ArrayList<E> extends AbstractList<E>
      */
     public boolean add(E e) {
         ensureCapacityInternal(size + 1);  // Increments modCount!!
+        /*
+        * 如果当前array中有9个元素，有两个线程同时到达这里，都通过了上一个方法ensureCapacityInternal的校验，
+        * 都觉得不需要扩容，然后第一个线程插入到array的末尾，现在array里面有10个元素了，然后第二个线程也插入到元素末尾，因为已经确认了不需要扩容，
+        * 现在array的容量只有10，所以插入到第11个元素的位置的时候报错了IndexOutOfBoundsException
+        * */
         elementData[size++] = e;
         return true;
     }
